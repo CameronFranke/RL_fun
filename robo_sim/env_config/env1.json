@@ -1,0 +1,28 @@
+{
+	"dimensions": [2000, 1000],
+	"boarder_padding": 20,
+	"robot_size": 20,
+	"sensor_range": 350,
+	"sensor_angles": [-60,-30, 0, 30, 60],
+	"food_count": 2,
+	"food_size": 30,
+	"food_value": 100,
+	"max_health": 300,
+	"starting_health": 100,
+	"walls": [
+		[
+			[750, 500],
+			[500, 750]
+		],
+		[
+			[1800, 200],
+			[1500, 600]
+		]
+	],
+	"q_settings":
+	{
+		"range_buckets": 4
+		
+
+	}
+}
