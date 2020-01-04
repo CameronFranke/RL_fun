@@ -133,13 +133,16 @@ class env_manager:
 			robot.max_health = self.env["max_health"]
 			if robot.__class__.__name__ == "Simple_q_learner":
 				robot.init_env_data(self.env)
+			if robot.__class__.__name__ == "DQN_agent":
+				robot.init_env_data(self.env)
+
 
 		# update all bots
 		for robot in self.robots:
 			robot.update(self.env, self.food)
 
 		while True:
-			if self.iterations % 10 == 0 and self.iterations > 19:
+			if self.iterations % 5 == 1 and self.iterations > 1:
 				self.render()
 
 			# update all bots
@@ -155,6 +158,9 @@ class env_manager:
 					robot.kill(self.env)
 					print("ded")
 					self.iterations += 1
+
+				if robot.__class__.__name__ == "DQN_agent":
+					robot.train()
 
 if __name__ == "__main__":
 	env = env_manager("env_config/env1.json",[])
