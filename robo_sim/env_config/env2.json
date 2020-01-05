@@ -2,25 +2,25 @@
 	"dimensions": [800, 800],
 	"boarder_padding": 20,
 	"robot_size": 20,
-	"sensor_range": 1000,
-	"sensor_angles": [-10, 10],
+	"sensor_range": 500,
+	"sensor_angles": [-10, 0, 10],
 	"food_count": 8,
 	"food_size": 60,
 	"food_value": 60,
 	"max_health": 4000,
-	"starting_health": 2000,
-	"min_replay_length": 1000,
-	"minibatch_size": 64,
-	"update_every": 2500,
+	"starting_health": 500,
+	"min_replay_length": 2000,
+	"minibatch_size": 128,
+	"update_every": 1000,
 	"walls": [
 	],
 	"q_settings":
 	{
 		"range_buckets": 4,
 		"lr": 0.1,
-		"discount": 0.99,
+		"discount": 0.85,
 		"action_history": 10,
-		"epsilon": 0.15,
+		"epsilon": 0.35,
 		"epsilon_decay": 0.9
 	}
 }

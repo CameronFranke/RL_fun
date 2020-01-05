@@ -147,17 +147,26 @@ class env_manager:
 
 			# update all bots
 			for robot in self.robots:
-				robot.act(self.env)
+				alive = robot.act(self.env)
 				env_effect = robot.update(self.env, self.food)
 				if 'food' in env_effect:
 					self.food_count -= 1
 					self.food.remove(env_effect["food"])
 					self.food = self.replenish_food()
 
-				if robot.health <= 0:
-					robot.kill(self.env)
-					print("ded")
+				if not alive:
 					self.iterations += 1
+					robot.kill(self.env)
+					print("\n\tded.\n")
+					##
+					## ## NEED A FUNCTION TO RESET ALL FOOD!!!!!
+					##
+
+
+				# if robot.health <= 0:
+				# 	robot.kill(self.env)
+				# 	print("ded")
+				# 	self.iterations += 1
 
 				if robot.__class__.__name__ == "DQN_agent":
 					robot.train()

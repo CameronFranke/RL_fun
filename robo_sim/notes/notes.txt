@@ -1,0 +1,17 @@
+Effects on knowledge gain:
+	Minimum size of history - more random actions to start learning from
+	Maximum size of history - size of corpus of data, larger seems for stable but slows learning
+	minibatch size - more of history is sampled
+	discount 
+	* all of these effect the rate at which knowledge it picked up and how that knowledge is maintained
+
+	* there seems to be a delicate balance between the value of food, penalty of death, history length and collision penalty
+
+	* so far, any increase in sensor count over 3, makes the bot worse
+	* small nets are better 
+	* every bot hits a peak and then it's behavior degenerates to spinning in a circle somewhere relatively far from food.
+		* could be that wall penalties are forcing it away from everything
+
+
+
+

@@ -6,6 +6,7 @@ from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatt
 from keras.optimizers import Adam
 from collections import deque
 import random
+from copy import copy
 
 
 class Mr_robot(ABC):
@@ -230,7 +231,7 @@ class Simple_q_learner(Mr_robot):
 class DQN_agent(Mr_robot):
 	def __init__(self, id_num, size, starting_loc, health, max_health):
 		super().__init__(id_num, size, starting_loc, health, max_health)
-		self.replay_memory = deque(maxlen=50000)
+		self.replay_memory = deque(maxlen=60000)
 		self.num_actions = 3
 
 	def init_env_data(self, env):
@@ -238,7 +239,7 @@ class DQN_agent(Mr_robot):
 		self.discount = env["q_settings"]["discount"]
 		self.action_history = deque(maxlen=env["q_settings"]["action_history"])
 		for i in range(env["q_settings"]["action_history"]):
-			self.action_history.append(0) # preload action hist buffer
+			self.action_history.append(2) # preload action hist buffer
 		self.sensor_count = len(env["sensor_angles"])
 		self.epsilon = env["q_settings"]["epsilon"]
 		self.epsilon_decay = env["q_settings"]["epsilon_decay"]
@@ -254,20 +255,20 @@ class DQN_agent(Mr_robot):
 
 	def create_model(self):
 		model = Sequential()
-		model.add(Dense(8))
-		model.add(Dense(8))
-		model.add(Dense(8))
+		model.add(Dense(8, activation="relu"))
+		model.add(Dense(8, activation="relu"))
 		model.add(Dense(self.num_actions, activation="linear"))
 		model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
 		return model
 
 	def get_state(self):
 		state = []
-		#for sensor in range(self.sensor_count):
+		for sensor in range(self.sensor_count):
 			# calculate distance to sensor reading points 
-			#state.append(np.linalg.norm(np.abs(self.sensor_contacts[sensor] - self.location)))
+			state.append(np.linalg.norm(np.abs(self.sensor_contacts[sensor] - self.location)) / self.sensor_range)
 		state.extend(self.food_sensed)
 		state.extend(list(self.action_history))
+		state.append(self.health / self.max_health)
 
 		#print(f"debug: {state}")
 		return state
@@ -277,6 +278,7 @@ class DQN_agent(Mr_robot):
 
 		if np.random.random() > self.epsilon: # select action from q table
 			action = np.argmax(self.model.predict(np.array([state])))
+			print(state)
 		else: # select random action
 			action = int(np.random.random()*self.num_actions)
 
@@ -296,21 +298,23 @@ class DQN_agent(Mr_robot):
 		reward = -5
 		if self.food_flag:
 			self.food_flag = False
-			reward += 50
+			reward += 1000
 		if self.collision:
 			self.collision = False # should be redundant
 			reward -= 1
-		reward += self.health / 1000
+		if self.health == 0:
+			reward -= 500
 
+		reward += self.health / 1000
 
 		self.replay_memory.append((state, action, reward, self.get_state()))
 
 		self.current_score += 1
 		if self.high_score < self.current_score: self.high_score = self.current_score
 
+		return self.health > 0 
 
 	def train(self):
-		DISCOUNT = .9
 		if len(self.replay_memory) < self.min_replay_length:
 			return
 
@@ -338,7 +342,7 @@ class DQN_agent(Mr_robot):
 			# If not a terminal state, get new q from future states, otherwise set it to 0
 			# almost like with Q Learning, but we use just part of equation here
 			max_future_q = np.max(future_qs_list[index])
-			new_q = reward + DISCOUNT * max_future_q
+			new_q = reward + self.discount * max_future_q
 			
 			# Update Q value for given state
 			current_qs = current_qs_list[index]
@@ -358,12 +362,11 @@ class DQN_agent(Mr_robot):
 			self.update_counter = 0
 
 	def kill(self, env):
-		# self.epsilon -= self.epsilon_decay
-		# self.action_history = [0]*self.action_history_length
-		# self.location = self.starting_loc
-		# self.angle = 0
-		# self.build_polygon()
-		# self.health = env["starting_health"]
+		self.location = copy(self.starting_loc)
+		self.angle = 0
+		self.polygon = self.build_polygon()
+		for i in range(env["q_settings"]["action_history"]):
+			self.action_history.append(2) # preload action hist buffer
 		self.health = env["starting_health"]
 		self.epsilon *= self.epsilon_decay
 		self.life_count += 1
