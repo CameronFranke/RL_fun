@@ -230,7 +230,7 @@ class Simple_q_learner(Mr_robot):
 class DQN_agent(Mr_robot):
 	def __init__(self, id_num, size, starting_loc, health, max_health):
 		super().__init__(id_num, size, starting_loc, health, max_health)
-		self.replay_memory = deque(maxlen=2000)
+		self.replay_memory = deque(maxlen=50000)
 		self.num_actions = 3
 
 	def init_env_data(self, env):
@@ -254,18 +254,18 @@ class DQN_agent(Mr_robot):
 
 	def create_model(self):
 		model = Sequential()
-		model.add(Dense(128))
-		model.add(Dense(128))
-		model.add(Dense(128))
+		model.add(Dense(8))
+		model.add(Dense(8))
+		model.add(Dense(8))
 		model.add(Dense(self.num_actions, activation="linear"))
 		model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
 		return model
 
 	def get_state(self):
 		state = []
-		for sensor in range(self.sensor_count):
+		#for sensor in range(self.sensor_count):
 			# calculate distance to sensor reading points 
-			state.append(np.linalg.norm(np.abs(self.sensor_contacts[sensor] - self.location)))
+			#state.append(np.linalg.norm(np.abs(self.sensor_contacts[sensor] - self.location)))
 		state.extend(self.food_sensed)
 		state.extend(list(self.action_history))
 
@@ -299,7 +299,9 @@ class DQN_agent(Mr_robot):
 			reward += 50
 		if self.collision:
 			self.collision = False # should be redundant
-			reward -= 5
+			reward -= 1
+		reward += self.health / 1000
+
 
 		self.replay_memory.append((state, action, reward, self.get_state()))
 

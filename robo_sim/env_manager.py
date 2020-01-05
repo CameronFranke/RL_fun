@@ -142,8 +142,8 @@ class env_manager:
 			robot.update(self.env, self.food)
 
 		while True:
-			if self.iterations % 5 == 1 and self.iterations > 1:
-				self.render()
+			#if self.iterations % 1 == 1 and self.iterations > 1:
+			self.render()
 
 			# update all bots
 			for robot in self.robots:
