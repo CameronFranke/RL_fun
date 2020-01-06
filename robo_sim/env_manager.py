@@ -126,6 +126,11 @@ class env_manager:
 			k = cv2.waitKey(1)
 			if k == 27: exit()
 
+	def reset_all_food(self):
+		self.food_count = 0
+		self.food = []
+		self.food = self.replenish_food()
+
 	def start_simulation(self):
 		# initialize robots health
 		for robot in self.robots:
@@ -142,7 +147,7 @@ class env_manager:
 			robot.update(self.env, self.food)
 
 		while True:
-			#if self.iterations % 1 == 1 and self.iterations > 1:
+			#if self.iterations % 5 == 0 and self.iterations > 1:
 			self.render()
 
 			# update all bots
@@ -158,9 +163,8 @@ class env_manager:
 					self.iterations += 1
 					robot.kill(self.env)
 					print("\n\tded.\n")
-					##
-					## ## NEED A FUNCTION TO RESET ALL FOOD!!!!!
-					##
+					self.reset_all_food()
+					
 
 
 				# if robot.health <= 0:

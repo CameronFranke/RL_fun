@@ -19,6 +19,7 @@ class Mr_robot(ABC):
 		self.polygon = self.build_polygon()
 		self.sensor_contacts = []
 		self.food_sensed = [] # 1 if sensor is pointed at food
+		self.starting_health = health
 		self.health = health
 		self.max_health = max_health
 		self.food_flag = False
@@ -231,7 +232,7 @@ class Simple_q_learner(Mr_robot):
 class DQN_agent(Mr_robot):
 	def __init__(self, id_num, size, starting_loc, health, max_health):
 		super().__init__(id_num, size, starting_loc, health, max_health)
-		self.replay_memory = deque(maxlen=60000)
+		self.replay_memory = deque(maxlen=30000)
 		self.num_actions = 3
 
 	def init_env_data(self, env):
@@ -255,10 +256,11 @@ class DQN_agent(Mr_robot):
 
 	def create_model(self):
 		model = Sequential()
-		model.add(Dense(8, activation="relu"))
-		model.add(Dense(8, activation="relu"))
-		model.add(Dense(self.num_actions, activation="linear"))
-		model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
+		model.add(Dense(64, activation="sigmoid"))
+		model.add(Dense(32, activation="sigmoid"))
+		model.add(Dense(32, activation="sigmoid"))
+		model.add(Dense(self.num_actions, activation="linear")) # softmax? 
+		model.compile(loss="mse", optimizer=Adam(lr=0.0001), metrics=['accuracy'])
 		return model
 
 	def get_state(self):
@@ -274,6 +276,7 @@ class DQN_agent(Mr_robot):
 		return state
 
 	def act(self, env):
+		print(f"REPLAY BUFFER LENGTH: {len(self.replay_memory)}")
 		state = self.get_state()
 
 		if np.random.random() > self.epsilon: # select action from q table
@@ -295,17 +298,17 @@ class DQN_agent(Mr_robot):
 		self.action_history.append(action)
 
 		# calculate_reward
-		reward = -5
+		reward = -1
 		if self.food_flag:
 			self.food_flag = False
-			reward += 1000
+			reward += 100
 		if self.collision:
 			self.collision = False # should be redundant
-			reward -= 1
+			# reward -= 1 # this might be a bad idea
 		if self.health == 0:
-			reward -= 500
+			reward -= 100
 
-		reward += self.health / 1000
+		reward += (self.health - self.starting_health) / 1000
 
 		self.replay_memory.append((state, action, reward, self.get_state()))
 
@@ -315,12 +318,11 @@ class DQN_agent(Mr_robot):
 		return self.health > 0 
 
 	def train(self):
-		if len(self.replay_memory) < self.min_replay_length:
+		if len(self.replay_memory) <= self.min_replay_length:
 			return
 
 		print("training...")
 		minibatch = random.sample(self.replay_memory, self.minibatch_size)
-		#for i in minibatch: print(i)
 		
 
 		# Get current states from minibatch, then query NN model for Q values
