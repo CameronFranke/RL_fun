@@ -15,3 +15,16 @@ Effects on knowledge gain:
 
 
 
+TODO:
+	1. Fix git crap
+	2. implement good way to experiment w/ models (ABC for dqn?)
+	3. write out model files periodically
+	4. Seed models w/ example? implement a manual record mode
+		* write all of the actions and results out to a file, read from it and then train new models w/ some example data before starting. Maybe just the target model? need to review the target model thing... 
+		* might help avoid the absolute buttfuck stupidity at the beginning.
+
+	* model memory
+		* LSTM
+		* Take in multiple 'frames' of history at each step
+
+
