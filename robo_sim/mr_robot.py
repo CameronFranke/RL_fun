@@ -1,9 +1,9 @@
 import numpy as np
 from shapely import geometry, affinity
 from abc import ABC, abstractmethod 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
-from keras.optimizers import Adam
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
+from tensorflow.keras.optimizers import Adam
 from collections import deque
 import random
 from copy import copy
